@@ -1,0 +1,11 @@
+{{ ansible_managed | comment }}
+
+[sshd]
+enabled = true
+port = {{ new_ssh_port | default('22') }}
+#action = firewallcmd-ipset
+logpath = %(sshd_log)s
+maxretry = 3
+bantime = 86400
+ignoreip = 127.0.0.1
+logencoding = utf-8

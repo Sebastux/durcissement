@@ -1,0 +1,4 @@
+---
+liste_install: [ 'fail2ban', 'firewalld' ]
+
+new_passwd: "{{ root_passwd | default('P@ssW0rD01') }}"

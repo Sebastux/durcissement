@@ -1,0 +1,79 @@
+{{ ansible_managed | comment }}
+
+# Configuration du port d'écoute
+Port {{ new_ssh_port | default('22') }}
+
+# Gestion réseau
+GatewayPorts no
+PermitTunnel no
+
+# Configuration de l'adresse d'écoute
+# ListenAddress {{ ansible_default_ipv4.address }}
+
+# Utilisation de la dernière version du protocole
+Protocol 2
+
+# Type de clé ssh à utiliser
+HostKey /etc/ssh/ssh_host_ecdsa_key
+HostKey /etc/ssh/ssh_host_ed25519_key
+
+# Gestion du fichier de log
+LogLevel INFO
+
+# Gestion de la connexion en root
+{% if not use_ssh_key %}
+  # Utilisation du mot de passe.
+PermitRootLogin yes
+{% elif use_ssh_key %}
+  # Utilisation de la clé.
+PermitRootLogin prohibit-password
+{% else %}
+  # Mode par défaut (mot de passe).
+PermitRootLogin yes
+{% endif %}
+
+# Nombre de tentative et de session
+MaxAuthTries 3
+MaxSessions 2
+
+# Gestion de la connexion par mot de passe
+{% if not use_ssh_key %}
+  # Utilisation du mot de passe.
+PasswordAuthentication yes
+PermitEmptyPasswords no
+{% elif use_ssh_key %}
+  # Utilisation de la clé.
+PasswordAuthentication no
+PermitEmptyPasswords no
+{% else %}
+  # Mode par défaut (mot de passe).
+PasswordAuthentication yes
+PermitEmptyPasswords no
+{% endif %}
+
+# Utilisation de PAM pour la gestion des comptes.
+UsePAM yes
+
+# Gestion de l'agent
+AllowAgentForwarding no
+X11Forwarding no
+AllowTcpForwarding no
+AllowStreamLocalForwarding no
+Compression no
+ClientAliveCountMax 2
+
+# Gestion de l'affichage à la connexion
+PrintMotd no
+PrintLastLog no
+
+# Création du fichier pid
+PidFile /var/run/sshd.pid
+
+# Configuration du chiffrement
+Ciphers aes128-ctr,aes192-ctr,aes256-ctr
+
+HostKeyAlgorithms ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,ssh-dss
+
+KexAlgorithms ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group14-sha1,diffie-hellman-group-exchange-sha256
+
+MACs hmac-sha2-256,hmac-sha2-512,hmac-sha1
