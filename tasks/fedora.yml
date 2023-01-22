@@ -1,18 +1,84 @@
 ---
+- name: Mise à jour de la machine.
+  dnf:
+    name: "*"
+    state: latest
+    update_cache: yes
+
+- name: Test de la présence de service XFCE.
+  stat:
+    path: /usr/lib/systemd/system/lightdm.service
+  register: xfce_svce
+
+- name: Création de répertoire de travail
+  file:
+    path: "{{ rep_travail }}"
+    owner: root
+    group: root
+    mode: '0755'
+    state: directory
+
 - name: Création de divers répertoires.
   file:
     path: "{{ item.repertoire }}"
     owner: root
     group: root
-    mode: "{{ item.mode }}"
+    mode: '0755'
     state: directory
     recurse: yes
   with_items:
-    - { repertoire: "{{ rep_travail }}", mode: '0755' }
-    - { repertoire: "{{ root_neofetch }}", mode: '0755' }
-    - { repertoire: "{{ user_neofetch }}", mode: '0755' }
-    - { repertoire: "{{ chemin_polices }}", mode: '0755' }
-    - { repertoire: "{{ chemin_vaches }}", mode: '0755' }
+    - "{{ root_neofetch }}"
+    - "{{ user_neofetch }}"
+    - "{{ chemin_polices }}"
+    - "{{ chemin_vaches }}"
+  when: xfce_svce.stat.exist is false | bool
+
+- name: Copie de la police de caractères.
+  copy:
+    src: files/banner3-D.flf
+    dest: "{{ chemin_polices }}/banner3-D.flf"
+    owner: root
+    group: root
+    backup: no
+    mode: 0644
+  when: xfce_svce.stat.exist is false | bool
+
+- name: Copie d'ascii art.
+  copy:
+    src: files/vaches.tar.bz2
+    dest: "{{ rep_travail }}"
+    owner: root
+    group: root
+    backup: no
+    mode: 0644
+  when: xfce_svce.stat.exist is false | bool
+
+- name: Installation d'ascii art.
+  unarchive:
+    src: "{{ rep_travail }}/vaches.tar.bz2"
+    dest: "{{ chemin_vaches }}"
+    remote_src: yes
+    owner: root
+    group: root
+    mode: 0644
+  when: xfce_svce.stat.exist is false | bool
+
+- name: Copie du template de changement de nom.
+  template:
+    src: templates/changenom.j2
+    dest: "{{ rep_travail }}/changenom.sh"
+    backup: no
+    owner: root
+    group: root
+    mode: 0700
+
+- name: Modification du nom de la machine.
+  shell: "{{ rep_travail }}/changenom.sh"
+  args:
+    executable: /bin/bash
+  register: var_changenom
+  failed_when: var_changenom.rc != 0
+  changed_when: var_changenom.rc == 0
 
 - name: Augmentation de la sécurité des mots de passe.
   lineinfile:
@@ -38,10 +104,11 @@
     - { regex: '^ENCRYPT_METHOD', ligne: 'ENCRYPT_METHOD SHA512' }
 
 - name: Installation des packages du rôle.
-  apt:
+  dnf:
     name: "{{ liste_install }}"
     state: latest
-    update_cache: yes
+    update_cache: no
+  when: xfce_svce.stat.exist is false | bool
 
 - name: Vérification du démarrage du pare-feu.
   systemd:
@@ -54,6 +121,7 @@
     name: fail2ban
     state: started
     enabled: yes
+  when: xfce_svce.stat.exist is false | bool
 
 - name: Ouverture de port pour divers services.
   firewalld:
@@ -79,13 +147,14 @@
   systemd:
     name: ctrl-alt-del.target
     masked: true
+  when: xfce_svce.stat.exist is false | bool
 
 - name: Suppression du répertoire de travail.
   file:
     path: "{{ rep_travail }}"
     state: absent
 
-- name: Redémarrage du serveur.
+- name: Redémarrage de la machine.
   reboot:
     msg: "Redémarrage automatique du serveur par ansible."
     connect_timeout: 5
