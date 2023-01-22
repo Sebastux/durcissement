@@ -32,7 +32,7 @@ PermitRootLogin prohibit-password
 PermitRootLogin yes
 {% endif %}
 
-# Nombre de tentative et de session
+# Nombre de tentative max et de session max
 MaxAuthTries 3
 MaxSessions 2
 
@@ -63,8 +63,8 @@ Compression no
 ClientAliveCountMax 2
 
 # Gestion de l'affichage à la connexion
-PrintMotd no
-PrintLastLog no
+PrintMotd yes
+PrintLastLog yes
 
 # Création du fichier pid
 PidFile /var/run/sshd.pid
