@@ -1,0 +1,20 @@
+#!/bin/bash
+# -*- coding: utf-8 -*-
+
+#==============================================================================
+# Titre            : changenom.sh
+# Description      : Script de modification d'hostname.
+# Auteur           : MELONI Sébastien
+# Date             : 23/03/2020
+# Modification     : 23/03/2020
+# Version          : 1.00
+# Utilisation      : ./changenom.sh
+# Notes            : Ce script est destiné à être lancé par ansible pour
+#                    la modification d'hostname.
+# Version de bash  : 4.2.46
+#==============================================================================
+
+hostnamectl set-hostname {{ fqdn_serveur }}
+hostnamectl set-deployment {{ status_serveur }}
+hostnamectl set-location "{{ commentaire }}"
+hostnamectl set-chassis "server"
