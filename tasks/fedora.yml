@@ -1,0 +1,95 @@
+---
+- name: Création de divers répertoires.
+  file:
+    path: "{{ item.repertoire }}"
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+    state: directory
+    recurse: yes
+  with_items:
+    - { repertoire: "{{ rep_travail }}", mode: '0755' }
+    - { repertoire: "{{ root_neofetch }}", mode: '0755' }
+    - { repertoire: "{{ user_neofetch }}", mode: '0755' }
+    - { repertoire: "{{ chemin_polices }}", mode: '0755' }
+    - { repertoire: "{{ chemin_vaches }}", mode: '0755' }
+
+- name: Augmentation de la sécurité des mots de passe.
+  lineinfile:
+    path: /etc/pam.d/passwd
+    line: "password   required     pam_unix.so sha512 shadow nullok rounds=65536"
+    owner: root
+    group: root
+    mode: '0644'
+    state: present
+    backup: no
+
+- name: Modification de la variable umask et de la méthode de chiffrement.
+  lineinfile:
+    path: /etc/login.defs
+    regexp: "{{ item.regex }}"
+    line: "{{ item.ligne }}"
+    owner: root
+    group: root
+    mode: '0644'
+    state: present
+  with_items:
+    - { regex: '^UMASK', ligne: 'UMASK           027' }
+    - { regex: '^ENCRYPT_METHOD', ligne: 'ENCRYPT_METHOD SHA512' }
+
+- name: Installation des packages du rôle.
+  apt:
+    name: "{{ liste_install }}"
+    state: latest
+    update_cache: yes
+
+- name: Vérification du démarrage du pare-feu.
+  systemd:
+    name: firewalld
+    state: started
+    enabled: yes
+
+- name: Vérification du démarrage de fail2ban.
+  systemd:
+    name: fail2ban
+    state: started
+    enabled: yes
+
+- name: Ouverture de port pour divers services.
+  firewalld:
+    service: "{{ item }}"
+    permanent: yes
+    immediate: yes
+    state: enabled
+  with_items:
+    - http
+    - https
+    - ssh
+
+- name: Installation du fichier de configuration du ssh.
+  template:
+    src: templates/sshd_config_modif.j2
+    dest: /etc/ssh/sshd_config.d/sshd_ansible.conf
+    backup: no
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Désactivation du reboot par ctrl alt supp.
+  systemd:
+    name: ctrl-alt-del.target
+    masked: true
+
+- name: Suppression du répertoire de travail.
+  file:
+    path: "{{ rep_travail }}"
+    state: absent
+
+- name: Redémarrage du serveur.
+  reboot:
+    msg: "Redémarrage automatique du serveur par ansible."
+    connect_timeout: 5
+    reboot_timeout: 60
+    pre_reboot_delay: 0
+    post_reboot_delay: 30
+    test_command: uptime

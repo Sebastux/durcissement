@@ -1,4 +1,16 @@
 ---
-liste_install: [ 'fail2ban', 'firewalld' ]
+liste_install: [ 'fail2ban', 'firewalld', 'neofetch' ]
 
-new_passwd: "{{ root_passwd | default('P@ssW0rD01') }}"
+rep_travail: "/root/travail"
+root_neofetch: "/root/.config/neofetch"
+user_neofetch: "/root/.config/neofetch"
+chemin_polices: "/opt/fichiers/figlet"
+chemin_vaches:  "/opt/fichiers/vaches"
+
+
+
+"{{ rep_travail }}"
+"{{ root_neofetch }}"
+"{{ user_neofetch }}"
+"{{ chemin_polices }}"
+"{{ chemin_vaches }}"
