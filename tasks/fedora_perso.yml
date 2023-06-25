@@ -1,0 +1,235 @@
+---
+- name: Mise à jour de la machine.
+  dnf:
+    name: "*"
+    state: latest
+    update_cache: yes
+
+- name: Test de la présence de service XFCE.
+  stat:
+    path: /usr/lib/systemd/system/lightdm.service
+  register: xfce_svce
+
+- name: Création des répertoires.
+  block:
+    - name: Création de répertoire de travail
+      file:
+        path: "{{ rep_travail }}"
+        owner: root
+        group: root
+        mode: '0755'
+        state: directory
+
+    - name: Création de divers répertoires.
+      file:
+        path: "{{ item }}"
+        owner: root
+        group: root
+        mode: '0755'
+        state: directory
+        recurse: yes
+      with_items:
+        - "{{ root_neofetch }}"
+        - "{{ user_neofetch }}"
+        - "{{ chemin_polices }}"
+        - "{{ chemin_vaches }}"
+      when: xfce_svce.stat.exists is false | bool
+
+- name: Gestion de la banniére.
+  block:
+    - name: Copie de la police de caractères.
+      copy:
+        src: files/banner3-D.flf
+        dest: "{{ chemin_polices }}/banner3-D.flf"
+        owner: root
+        group: root
+        backup: no
+        mode: 0644
+      when: xfce_svce.stat.exists is false | bool
+
+    - name: Copie d'ascii art.
+      copy:
+        src: files/vaches.tar.bz2
+        dest: "{{ rep_travail }}"
+        owner: root
+        group: root
+        backup: no
+        mode: 0644
+      when: xfce_svce.stat.exists is false | bool
+
+    - name: Installation d'ascii art.
+      unarchive:
+        src: "{{ rep_travail }}/vaches.tar.bz2"
+        dest: "{{ chemin_vaches }}"
+        remote_src: yes
+        owner: root
+        group: root
+        mode: 0644
+      when: xfce_svce.stat.exists is false | bool
+
+- name: Changement de nom de la machine.
+  block:
+    - name: Copie du template de changement de nom.
+      template:
+        src: templates/changenom.j2
+        dest: "{{ rep_travail }}/changenom.sh"
+        backup: no
+        owner: root
+        group: root
+        mode: 0700
+
+    - name: Modification du nom de la machine.
+      shell: "{{ rep_travail }}/changenom.sh"
+      args:
+        executable: /bin/bash
+      register: var_changenom
+      failed_when: var_changenom.rc != 0
+      changed_when: var_changenom.rc == 0
+
+- name: Augmentation de la sécurité des mots de passe.
+  lineinfile:
+    path: /etc/pam.d/passwd
+    line: "password   required     pam_unix.so sha512 shadow nullok rounds=65536"
+    owner: root
+    group: root
+    mode: '0644'
+    state: present
+    backup: no
+
+- name: Modification de la variable umask et de la méthode de chiffrement.
+  lineinfile:
+    path: /etc/login.defs
+    regexp: "{{ item.regex }}"
+    line: "{{ item.ligne }}"
+    owner: root
+    group: root
+    mode: '0644'
+    state: present
+  with_items:
+    - { regex: '^UMASK', ligne: 'UMASK           027' }
+    - { regex: '^ENCRYPT_METHOD', ligne: 'ENCRYPT_METHOD SHA512' }
+
+- name: Installation des packages du rôle.
+  dnf:
+    name: "{{ liste_install }}"
+    state: latest
+    update_cache: no
+  when: xfce_svce.stat.exists is false | bool
+
+- name: Gestion des services.
+  block:
+    - name: Vérification du démarrage du pare-feu.
+      systemd:
+        name: firewalld
+        state: started
+        enabled: yes
+
+    - name: Ouverture de port pour divers services.
+      firewalld:
+        service: "{{ item }}"
+        permanent: yes
+        immediate: yes
+        state: enabled
+      with_items:
+        - http
+        - https
+        - ssh
+
+    - name: Vérification du démarrage de fail2ban.
+      systemd:
+        name: fail2ban
+        state: started
+        enabled: yes
+      when: xfce_svce.stat.exists is false | bool
+
+    - name: Désactivation du reboot par ctrl alt supp.
+      systemd:
+        name: ctrl-alt-del.target
+        masked: true
+      when: xfce_svce.stat.exists is false | bool
+
+- name: Durcissement du ssh.
+  block:
+    - name: Suppression des clés ssh rsa et dsa.
+      file:
+        path: /etc/ssh/"{{ item }}"
+        state: absent
+      with_items:
+        - ssh_host_rsa_key
+        - ssh_host_rsa_key.pub
+        - ssh_host_dsa_key
+        - ssh_host_dsa_key.pub
+
+    - name: Suppression des config par défaut.
+      shell: rm -f /etc/ssh/sshd_config.d/*
+      args:
+        executable: /bin/bash
+      register: var_defaut
+      failed_when: var_defaut.rc != 0
+      changed_when: var_defaut.rc == 0
+
+    - name: Copie des divers templates.
+      template:
+        src: "templates/{{ item.fichier }}"
+        dest: "/etc/ssh/{{ item.chemin }}"
+        backup: no
+        owner: root
+        group: root
+        mode: 0644
+      with_items:
+        - { fichier: 'sshd_config_orig.j2', chemin: 'sshd_config' }
+        - { fichier: 'sshd_config_modif.j2', chemin: 'sshd_config.d/sshd_ansible.conf' }
+        - { fichier: 'ssh_config_chiffrement.j2', chemin: 'sshd_config.d/ssh_config_chiffrement.conf' }
+
+    - name: Création d'une clé ssh pour le compte root.
+      openssh_keypair:
+        path: "./cles_ssh/root"
+        backend: cryptography
+        comment: "Clé SSH généré par ansible."
+        mode: 0600
+        regenerate: always
+        state: present
+        type: ed25519
+      delegate_to: localhost
+
+    - name: Installation de la clé sur le compte root.
+      authorized_key:
+        user: root
+        state: present
+        key: "{{ lookup('file', './cles_ssh/root.pub') }}"
+        comment: "Clé SSH généré et installé par ansible."
+        exclusive: yes
+        manage_dir: yes
+
+- name: Blaclistage de module
+  modprobe:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - dccp
+    - sctp
+    - rds
+    - tipc
+    - ohci1394
+    - sbp2
+    - dv1394
+    - raw1394
+    - video1394
+    - firewire-ohci
+    - firewire-sbp2
+    - firewire-core
+  ignore_errors: true
+
+- name: Suppression du répertoire de travail.
+  file:
+    path: "{{ rep_travail }}"
+    state: absent
+
+- name: Redémarrage de la machine.
+  reboot:
+    msg: "Redémarrage automatique du serveur par ansible."
+    connect_timeout: 5
+    reboot_timeout: 60
+    pre_reboot_delay: 0
+    post_reboot_delay: 30
+    test_command: uptime

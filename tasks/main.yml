@@ -1,7 +1,7 @@
 ---
 - name: Durcissement d'une machine fedora.
   import_tasks:
-    file: fedora.yml
+    file: fedora_perso.yml
   when: ansible_distribution == "Fedora"
 
 # - name: Installation d'une machine CentOS.
