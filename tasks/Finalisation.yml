@@ -1,0 +1,233 @@
+- name: Configuration de la timezone.
+  timezone:
+    name: Europe/Paris
+
+- name: Désactivation de selinux.
+  selinux:
+    state: disabled
+
+- name: Désactivation de ctrl alt supp.
+  ansible.builtin.systemd:
+    name: ctrl-alt-del.target
+    enabled: false
+    masked: no
+
+- name: Gestion d'erreur
+  block:
+    - name: Création d'une clé ssh pour le compte root.
+      openssh_keypair:
+        path: "../cles_ssh/root"
+        backend: cryptography
+        comment: "Clé SSH généré par ansible."
+        mode: 0600
+        regenerate: always
+        state: present
+        type: ed25519
+      delegate_to: localhost
+
+    - name: Installation de la clé sur le compte.
+      authorized_key:
+        user: root
+        state: present
+        key: "{{ lookup('file', '../cles_ssh/root.pub') }}"
+        comment: "Clé SSH généré et installé par ansible."
+        exclusive: yes
+        manage_dir: yes
+
+  rescue:
+    - name: Création d'une clé ssh pour le compte root (rescue).
+      openssh_keypair:
+        path: "cles_ssh/root"
+        backend: cryptography
+        comment: "Clé SSH généré par ansible."
+        mode: 0600
+        regenerate: always
+        state: present
+        type: ed25519
+      delegate_to: localhost
+
+    - name: Installation de la clé sur le compte (rescue).
+      authorized_key:
+        user: root
+        state: present
+        key: "{{ lookup('file', 'cles_ssh/root.pub') }}"
+        comment: "Clé SSH généré et installé par ansible."
+        exclusive: yes
+        manage_dir: yes
+
+- name: Sécurisation du ssh
+  block:
+    - name: Suppression des clés ssh rsa et dsa.
+      file:
+        path: /etc/ssh/"{{ item }}"
+        state: absent
+      with_items:
+        - ssh_host_rsa_key
+        - ssh_host_rsa_key.pub
+        - ssh_host_dsa_key
+        - ssh_host_dsa_key.pub
+
+    - name: Suppression des config sshd par défaut.
+      shell: rm -fr *
+      args:
+        chdir: /etc/ssh/sshd_config.d/
+        executable: /bin/bash
+      register: var_shell
+      failed_when: var_shell.rc != 0
+      changed_when: var_shell.rc == 0
+
+    - name: Copie des divers templates.
+      template:
+        src: "templates/{{ item.fichier }}"
+        dest: "{{ item.chemin }}"
+        backup: no
+        owner: root
+        group: root
+        mode: 0644
+      with_items:
+        - { fichier: 'sshd_config_orig.j2', chemin: '/etc/ssh/sshd_config' }
+        - { fichier: 'sshd_config_modif.j2', chemin: '/etc/ssh/sshd_config.d/sshd_ansible_config.conf' }
+        - { fichier: 'ssh_config_chiffrement.j2', chemin: '/etc/ssh/sshd_config.d/sshd_ansible_chiffrement.conf' }
+        - { fichier: 'ssh_banniere.j2', chemin: '/etc/ssh/sshd_config.d/sshd_ansible_banniere.conf' }
+        - { fichier: 'banniere.j2', chemin: '/etc/issue' }
+
+# - name: Désactivation et blacklistage.
+#   block:
+#     - name: Désactivation du protocole dccp - blacklist.
+#       kernel_blacklist:
+#         name: dccp
+#         state: present
+#
+#     - name: Désactivation du protocole dccp - modprobe.
+#       lineinfile:
+#         dest: /etc/modprobe.d/no-dccp.conf
+#         line: 'blacklist dccp'
+#         mode: '0644'
+#         create: yes
+#
+#     - name: Désactivation du protocole sctp - blacklist.
+#       kernel_blacklist:
+#         name: sctp
+#         state: present
+#
+#     - name: Désactivation du sctp - modprobe.
+#       lineinfile:
+#         dest: /etc/modprobe.d/no-sctp.conf
+#         line: 'blacklist sctp'
+#         mode: '0644'
+#         create: yes
+#
+#     - name: Désactivation du protocole rds - blacklist.
+#       kernel_blacklist:
+#         name: rds
+#         state: present
+#
+#     - name: Désactivation du rds - modprobe.
+#       lineinfile:
+#         dest: /etc/modprobe.d/no-rds.conf
+#         line: 'blacklist rds'
+#         mode: '0644'
+#         create: yes
+#
+#     - name: Désactivation du protocole tipc - blacklist.
+#       kernel_blacklist:
+#         name: tipc
+#         state: present
+#
+#     - name: Désactivation du tipc - modprobe.
+#       lineinfile:
+#         dest: /etc/modprobe.d/no-tipc.conf
+#         line: 'blacklist tipc'
+#         mode: '0644'
+#         create: yes
+#
+#     - name: Désactivation des ports USB - blacklist.
+#       kernel_blacklist:
+#         name: usb-storage
+#         state: present
+#
+#     - name: Désactivation des ports USB - modprobe.
+#       lineinfile:
+#         dest: /etc/modprobe.d/no-usb.conf
+#         line: 'install usb-storage /bin/true'
+#         mode: '0644'
+#         create: yes
+#
+#     - name: Désactivation du firewire - blacklist.
+#       kernel_blacklist:
+#         name: firewire-core
+#         state: present
+#
+#     - name: Désactivation du firewire - modprobe.
+#       lineinfile:
+#         dest: /etc/modprobe.d/no-firewire.conf
+#         line: "{{ item }}"
+#         mode: '0644'
+#         create: yes
+#       with_items:
+#         - 'blacklist ohci1394'
+#         - 'blacklist sbp2'
+#         - 'blacklist dv1394'
+#         - 'blacklist raw1394'
+#         - 'blacklist video1394'
+#         - 'blacklist firewire-ohci'
+#         - 'blacklist firewire-sbp2'
+
+- name: Suppression de l'ancienne clé SSH sur la machine locale.
+  shell: 'sed -i "/{{ ansible_default_ipv4.address }}/d" $HOME/.ssh/known_hosts'
+  args:
+    executable: /bin/bash
+  delegate_to: localhost
+  register: var_sshkey
+  failed_when: var_sshkey.rc != 0
+  changed_when: var_sshkey.rc == 0
+
+- name: Gestion des services.
+  block:
+    - name: Vérification du démarrage du pare-feu.
+      systemd:
+        name: firewalld
+        state: started
+        enabled: yes
+
+    - name: Vérification du démarrage du pare-feu.
+      systemd:
+        name: sshd
+        state: started
+        enabled: yes
+
+    - name: Ouverture de port pour divers services.
+      firewalld:
+        service: "{{ item }}"
+        permanent: yes
+        immediate: yes
+        state: enabled
+      with_items:
+        - http
+        - https
+        - ssh
+
+- name: Test de présence d'un fichier.
+  stat:
+    path: /etc/rc.d/rc.local
+  register: st
+
+- name: Modification de droits sur un fichier.
+  file:
+    path: /etc/rc.d/rc.local
+    owner: root
+    group: root
+    mode: '0744'
+  when: st.stat.exists is true | bool
+
+- name: Redémarrage du serveur.
+  reboot:
+    msg: "Redémarrage automatique du serveur par ansible."
+    connect_timeout: 5
+    reboot_timeout: 60
+    pre_reboot_delay: 0
+    post_reboot_delay: 30
+    test_command: uptime
+  when:
+    - ( ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"] and not ( lookup("env", "container") == "bwrap-osbuild" ) )
+    - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]

@@ -1,13 +1,4 @@
 ---
-liste_install: [ 'neofetch', 'fail2ban', 'fail2ban-all', 'fail2ban-firewalld', 'fail2ban-hostsdeny',
-                 'fail2ban-selinux', 'fail2ban-sendmail', 'fail2ban-server', 'fail2ban-mail',
-                 'fail2ban-systemd', 'fail2ban-tests' ]
-
 default_name: "{{ ansible_distribution | lower }}.local"
 use_ssh_key: false | bool
-
-rep_travail: "/root/travail"
-root_neofetch: "/root/.config/neofetch"
-user_neofetch: "/etc/skel/.config/neofetch"
-chemin_polices: "/opt/fichiers/figlet"
-chemin_vaches:  "/opt/fichiers/vaches"
+new_passwd: "P@ssW0rD#59"

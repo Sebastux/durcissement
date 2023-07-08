@@ -1,15 +1,27 @@
 ---
-- name: Durcissement d'une machine fedora.
-  import_tasks:
-    file: fedora_perso.yml
-  when: ansible_distribution == "Fedora"
+- name: Affichage de la distrib
+  debug:
+    var: ansible_distribution
 
-# - name: Installation d'une machine CentOS.
-#   import_tasks:
-#     file: centos.yml
-#   when: ansible_distribution == "CentOS"
-#
-# - name: Installation d'une machine Rocky Linux.
-#   import_tasks:
-#     file: rocky.yml
-#   when: ansible_distribution == "Rocky"
+- name: Durcissement d'une machine fedora.
+  when: ansible_distribution == "Fedora"
+  block:
+    - name: Durcissement d'une machine fedora.
+      import_tasks:
+        file: fedora_serveur.yml
+
+    - name: Finalisation du durcissement.
+      import_tasks:
+        file: Finalisation.yml
+
+- name: Durcissement d'une machine Alma Linux.
+  when: ansible_distribution == "AlmaLinux"
+  block:
+
+    # - name: Durcissement d'une machine Alma Linux.
+    #   import_tasks:
+    #     file: Alma9.yml
+
+    - name: Finalisation du durcissement.
+      import_tasks:
+        file: Finalisation.yml

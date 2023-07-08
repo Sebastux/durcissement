@@ -1,0 +1,23 @@
+exclude_paths:
+  - .cache/
+  - .github/
+  - .yamllint
+  - .ansible-lint
+  - 'cles_ssh'
+  - '*/meta/*'
+  - '*/tests/*'
+
+skip_list:
+  - 'fqcn-builtins'
+  - 'package-latest'
+
+warn_list:
+  - 'document-end'
+  - 'brackets'
+  - 'ignore-errors'
+  - 'command-instead-of-shell'
+  - 'command-instead-of-module'
+
+verbosity: 1
+
+use_default_rules: true
