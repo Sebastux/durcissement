@@ -1,0 +1,14 @@
+pip
+setuptools
+wheel
+ansible
+ansible-core
+passlib
+requests
+six
+cryptography
+netaddr
+jmespath
+pywinrm
+docker
+PyMySQL
