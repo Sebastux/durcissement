@@ -1,14 +1,14 @@
 {{ ansible_managed | comment }}
 
 # Configuration du port d'écoute
-Port {{ new_ssh_port | default('22') }}
+Port {{ ssh_port | default('22') }}
 
 # Gestion réseau
 GatewayPorts no
 PermitTunnel no
 
 # Configuration de l'adresse d'écoute
-# ListenAddress {{ ansible_default_ipv4.address }}
+ListenAddress {{ ansible_default_ipv4.address }}
 
 # Utilisation de la dernière version du protocole
 Protocol 2
@@ -21,35 +21,15 @@ HostKey /etc/ssh/ssh_host_ed25519_key
 LogLevel INFO
 
 # Gestion de la connexion en root
-{% if use_ssh_key is sameas false %}
-# Utilisation du mot de passe.
-PermitRootLogin yes
-{% elif use_ssh_key is sameas true %}
-# Utilisation de la clé.
 PermitRootLogin prohibit-password
-{% else %}
-# Mode par défaut (mot de passe).
-PermitRootLogin yes
-{% endif %}
 
-# Nombre de tentative max et de session max
+# Nombre de tentative et de session
 MaxAuthTries 3
 MaxSessions 2
 
 # Gestion de la connexion par mot de passe
-{% if use_ssh_key is sameas false %}
-# Utilisation du mot de passe.
-PasswordAuthentication yes
-PermitEmptyPasswords no
-{% elif use_ssh_key is sameas true %}
-# Utilisation de la clé.
 PasswordAuthentication no
 PermitEmptyPasswords no
-{% else %}
-# Mode par défaut (mot de passe).
-PasswordAuthentication yes
-PermitEmptyPasswords no
-{% endif %}
 
 # Utilisation de PAM pour la gestion des comptes.
 UsePAM yes
@@ -62,5 +42,16 @@ AllowStreamLocalForwarding no
 Compression no
 ClientAliveCountMax 2
 
+# Gestion de l'affichage à la connexion
+PrintMotd no
+PrintLastLog yes
+Banner /etc/issue.net
+
 # Création du fichier pid
 PidFile /var/run/sshd.pid
+
+# Configuration du chiffrement
+Ciphers aes128-ctr,aes192-ctr,aes256-ctr
+HostKeyAlgorithms ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,ssh-dss
+KexAlgorithms diffie-hellman-group-exchange-sha256
+MACs hmac-sha2-256,hmac-sha2-512
