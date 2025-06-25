@@ -3,25 +3,20 @@
   debug:
     var: ansible_distribution
 
+
 - name: Durcissement d'une machine fedora.
+  import_tasks:
+    file: fedora.yml
   when: ansible_distribution == "Fedora"
-  block:
-    - name: Durcissement d'une machine fedora.
-      import_tasks:
-        file: fedora_serveur.yml
 
-    - name: Finalisation du durcissement.
-      import_tasks:
-        file: Finalisation.yml
-
-- name: Durcissement d'une machine Alma Linux.
-  when: ansible_distribution == "AlmaLinux"
-  block:
-
-    # - name: Durcissement d'une machine Alma Linux.
-    #   import_tasks:
-    #     file: Alma9.yml
-
-    - name: Finalisation du durcissement.
-      import_tasks:
-        file: Finalisation.yml
+# - name: Durcissement d'une machine Alma Linux.
+#   when: ansible_distribution == "AlmaLinux"
+#   block:
+#
+#     # - name: Durcissement d'une machine Alma Linux.
+#     #   import_tasks:
+#     #     file: Alma9.yml
+#
+#     - name: Finalisation du durcissement.
+#       import_tasks:
+#         file: Finalisation.yml
