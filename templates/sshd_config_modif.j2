@@ -18,7 +18,7 @@ HostKey /etc/ssh/ssh_host_ecdsa_key
 HostKey /etc/ssh/ssh_host_ed25519_key
 
 # Gestion du fichier de log
-LogLevel INFO
+LogLevel VERBOSE
 
 # Gestion de la connexion en root
 PermitRootLogin prohibit-password
@@ -41,6 +41,7 @@ AllowTcpForwarding no
 AllowStreamLocalForwarding no
 Compression no
 ClientAliveCountMax 2
+TCPKeepAlive no
 
 # Gestion de l'affichage à la connexion
 PrintMotd no
