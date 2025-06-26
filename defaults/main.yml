@@ -1,4 +1,1 @@
 ---
-default_name: "{{ ansible_distribution | lower }}.local"
-use_ssh_key: false | bool
-new_passwd: "P@ssW0rD#59"
