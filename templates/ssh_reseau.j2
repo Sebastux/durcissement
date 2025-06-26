@@ -1,0 +1,8 @@
+{{ ansible_managed | comment }}
+
+# Limitation de l'accès SSH au réseau local automatiquement détecté
+Match Address {{ ansible_default_ipv4.network }}/{{ ansible_default_ipv4.prefix }}
+
+# Autorise tout comportement par défaut sur le réseau local
+Match Address *
+    DenyUsers all
