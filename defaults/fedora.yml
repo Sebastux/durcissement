@@ -1,6 +1,3 @@
 ---
 liste_install: ['audit']
 liste_remove: ['telnet', 'rsh', 'rlogin', 'ftp']
-
-
-telnet rsh rlogin ftp
