@@ -1,0 +1,1 @@
+Le rôle crée une paire de clés SSH et les stocks dans ce répertoire. La clé est ensuite utilisée par ansible pour se connecter à la machine. Ce répertoire ne doit pas être supprimé sous peine d'échec du rôle et d'une impossibilité de se connecter à la machine.
