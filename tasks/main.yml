@@ -1,22 +1,23 @@
 ---
-- name: Affichage de la distrib
-  debug:
-    var: ansible_distribution
+- name: Affichage de la distrib.
+  ansible.builtin.debug:
+    msg:
+      - "Nom de la distribution              : {{ ansible_distribution }}."
+      - "Version majeure de la distribution  : {{ ansible_distribution_major_version }}."
+      - "Version mmineure de la distribution : {{ ansible_distribution_version }}."
+      - "Architecture                        : {{ ansible_machine }}."
 
-
-- name: Durcissement d'une machine fedora.
-  import_tasks:
+- name: "Durcissement d'une machine fedora {{ ansible_distribution_major_version }}."
+  ansible.builtin.import_tasks:
     file: fedora.yml
   when: ansible_distribution == "Fedora"
 
-# - name: Durcissement d'une machine Alma Linux.
-#   when: ansible_distribution == "AlmaLinux"
-#   block:
-#
-#     # - name: Durcissement d'une machine Alma Linux.
-#     #   import_tasks:
-#     #     file: Alma9.yml
-#
-#     - name: Finalisation du durcissement.
-#       import_tasks:
-#         file: Finalisation.yml
+# - name: "Durcissement d'une machine AlmaLinux {{ ansible_distribution_major_version }}."
+#   ansible.builtin.import_tasks:
+#     file: almalinux9.yml
+#   when: ansible_distribution == "AlmaLinux" and ansible_distribution_major_version == "9")
+
+- name: "Durcissement d'une machine AlmaLinux {{ ansible_distribution_major_version }}."
+  ansible.builtin.import_tasks:
+    file: almalinux10.yml
+  when: ansible_distribution == "AlmaLinux" and ansible_distribution_major_version == "10")
