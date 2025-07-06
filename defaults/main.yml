@@ -1,1 +1,8 @@
 ---
+liste_serveur:
+  - 0.fr.pool.ntp.org iburst
+  - 1.fr.pool.ntp.org iburst
+  - 2.fr.pool.ntp.org iburst
+  - 3.fr.pool.ntp.org iburst
+
+seq: ""

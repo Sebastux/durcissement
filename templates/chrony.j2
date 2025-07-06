@@ -1,0 +1,57 @@
+{{ ansible_managed | comment }}
+
+{% for item in seq -%}
+{{ item }}
+{%- endfor %}
+# Liste des serveurs NTP de synchro
+{% for item in seq -%}
+{{ item }}
+{%- endfor %}
+{%- for serveur in liste_serveur %}
+server {{ serveur }}
+{% endfor %}
+
+# Port d’écoute
+port 123
+
+# Adresse de broadcast et adresse et adresse d'écoute pour les clients
+{% if ansible_default_ipv4.address is defined %}
+broadcast 60 {{ ansible_default_ipv4.address }} 123
+bindcmdaddress {{ ansible_default_ipv4.address }}
+{% else %}
+broadcast 60 127.0.0.1 123
+bindcmdaddress 127.0.0.1
+{% endif %}
+
+# Record the rate at which the system clock gains/losses time.
+driftfile /var/lib/chrony/drift
+
+# Gestion des fichiers log
+logdir /var/log/chrony
+
+# Gestion du fichier pid
+pidfile /var/run/chrony/chronyd.pid
+
+# Allow the system clock to be stepped in the first three updates
+# if its offset is larger than 1 second.
+makestep 10 3
+
+# Enable kernel synchronization of the real-time clock (RTC).
+rtcsync
+
+# Enable hardware timestamping on all interfaces that support it.
+#hwtimestamp *
+
+# Increase the minimum number of selectable sources required to adjust
+# the system clock.
+#minsources 2
+
+# Serve time even if not synchronized to a time source.
+#local stratum 10
+
+# Get TAI-UTC offset and leap seconds from the system tz database.
+leapsecmode slew
+maxslewrate 1000
+smoothtime 400 0.001 leaponly
+
+stratumweight 0
