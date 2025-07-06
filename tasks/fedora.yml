@@ -3,123 +3,11 @@
   ansible.builtin.include_vars:
     file: defaults/fedora.yml
 
-- name: Configuration de dnf5.
-  ansible.builtin.script: install_dnf.sh
-  register: var_dnf
-  changed_when: var_dnf.rc == 0
-  failed_when: var_dnf.rc != 0 and var_dnf.rc != 1
-  ignore_errors: true
-
-- name: Suppression de paquets à risque.
-  ansible.builtin.dnf5:
-    name: "{{ liste_remove }}"
-    state: absent
-  ignore_errors: true
-
-- name: Mise à jour du système.
-  ansible.builtin.dnf5:
-    name: "*"
-    state: latest
-    update_cache: true
-
-- name: Installation de packages.
-  ansible.builtin.dnf5:
-    name: "{{ liste_install }}"
-    state: latest
-    update_cache: false
-
 - name: Activation d'auditd.
   ansible.builtin.systemd_service:
     name: auditd
     state: started
     enabled: true
-
-- name: Vidage de fichiers.
-  ansible.builtin.copy:
-    dest: "{{ item }}"
-    content: ""
-    owner: root
-    group: root
-    mode: '0644'
-    backup: false
-  loop:
-    - /etc/issue
-    - /etc/motd
-
-- name: Installation de la banniére.
-  ansible.builtin.template:
-    src: banniere.j2
-    dest: /etc/issue.net
-    backup: false
-    owner: root
-    group: root
-    mode: '0644'
-
-- name: Création d'un répertoire de surcharge.
-  ansible.builtin.file:
-    path: /etc/systemd/system/sshd.service.d
-    state: directory
-    owner: root
-    group: root
-    mode: '0755'
-
-- name: Configuration du ssh.
-  ansible.builtin.template:
-    src: "{{ item.fichier }}"
-    dest: "{{ item.chemin }}"
-    backup: no
-    owner: root
-    group: root
-    mode: '0600'
-    validate: sshd -t -f %s
-  loop:
-    - {fichier: 'sshd_config_fedora.j2', chemin: '/etc/ssh/sshd_config'}
-    - {fichier: 'sshd_config_modif.j2', chemin: '/etc/ssh/sshd_config.d/90-sshd_config_modif.conf'}
-    - {fichier: 'ssh_chiffrement.j2', chemin: '/etc/ssh/sshd_config.d/91-crypto-policies.conf'}
-    - {fichier: 'ssh_reseau.j2', chemin: '/etc/ssh/sshd_config.d/92-ssh_reseau.conf'}
-    - {fichier: 'durcissemnt.j2', chemin: '/etc/systemd/system/sshd.service.d/durcissemnt.conf'}
-
-- name: Création d'une clé ssh pour le compte root.
-  openssh_keypair:
-    path: "{{ role_path }}/cles_ssh/root-{{ ansible_hostname }}"
-    backend: cryptography
-    comment: "Clé SSH générée par ansible."
-    mode: 0600
-    regenerate: always
-    state: present
-    type: ed25519
-  delegate_to: localhost
-
-- name: Installation de la clé sur le compte.
-  authorized_key:
-    user: root
-    state: present
-    key: "{{ lookup('file', role_path ~ '/cles_ssh/root-{{ ansible_hostname }}.pub') }}"
-    comment: "Clé SSH générée et installée par ansible."
-    exclusive: true
-    manage_dir: true
-
-- name: Chargement de la clé SSH.
-  ansible.builtin.set_fact:
-    ansible_ssh_private_key_file: "{{ role_path }}/cles_ssh/root-{{ ansible_hostname }}"
-
-- name: Configuration de la timezone.
-  community.general.timezone:
-    name: Europe/Paris
-
-- name: Suppression de fichiers inutiles.
-  ansible.builtin.file:
-    path: "{{ item }}"
-    state: absent
-  loop:
-    - /etc/ssh/ssh_host_ecdsa_key
-    - /etc/ssh/ssh_host_ecdsa_key.pub
-    - /etc/ssh/ssh_host_ed25519_key
-    - /etc/ssh/ssh_host_ed25519_key.pub
-    - /etc/ssh/ssh_host_rsa_key
-    - /etc/ssh/ssh_host_rsa_key.pub
-    - /etc/ssh/sshd_config.d/01-permitrootlogin.conf
-    - /etc/ssh/sshd_config.d/50-redhat.conf
 
 - name: Désactivation de services.
   ansible.builtin.systemd_service:
@@ -140,20 +28,6 @@
     - dnf-makecache.timer
   ignore_errors: true
 
-- name: Désinstallation du package qemu-guest-agent (machine physique).
-  ansible.builtin.dnf5:
-    name: "qemu-guest-agent"
-    state: absent
-    update_cache: false
-  when: not ansible_system_vendor is search("QEMU")
-
-- name: activation du service qemu-guest-agent (VM).
-  ansible.builtin.systemd_service:
-    name: qemu-guest-agent
-    state: started
-    enabled: true
-  when: ansible_system_vendor is search("QEMU")
-
 - name: Configuration de firewall.
   ansible.posix.firewalld:
     service: "{{ item.service }}"
@@ -165,36 +39,7 @@
     - {service: 'https', etat: 'disabled'}
     - {service: 'ftp', etat: 'disabled'}
     - {service: 'ssh', etat: 'enabled'}
-
-- name: Modiffication du chiffrement du mot de passe.
-  community.general.pamd:
-    name: passwd
-    type: password
-    new_type: password
-    control: substack
-    module_path: postlogin
-    new_module_path: pam_unix.so
-    backup: false
-    new_control: required
-    module_arguments: 'sha512 shadow nullok rounds=65536'
-    state: after
-
-- name: S'assurer que la valeur de umask par défaut est stricte dans /etc/login.defs.
-  ansible.builtin.lineinfile:
-    path: /etc/login.defs
-    regexp: '^UMASK'
-    line: 'UMASK 027'
-    state: present
-    backup: true
-
-- name: Ajouter umask 027 dans /etc/profile si non présent.
-  ansible.builtin.lineinfile:
-    path: /etc/profile
-    regexp: '^umask'
-    line: 'umask 027'
-    insertafter: EOF
-    state: present
-    backup: true
+    - {service: 'ntp', etat: 'enabled'}
 
 - name: S'assurer que les fichiers et dossiers ont les bonnes permissions.
   ansible.builtin.file:
@@ -222,97 +67,7 @@
     - {chemin: /root, mode: '0700'}
     - {chemin: /usr/bin/as, mode: '700'}
     - {chemin: /usr/bin/ccache, mode: '700'}
-
-- name: Désactiver le stockage USB.
-  ansible.builtin.copy:
-    dest: /etc/modprobe.d/usb-storage.conf
-    owner: root
-    group: root
-    mode: '0644'
-    content: |
-      # Désactivation du module usb-storage pour renforcer la sécurité.
-      blacklist usb-storage
-      install usb-storage /bin/true
-  when: ansible_system_vendor is search("QEMU")
-
-- name: Désactiver le stockage FireWire (firewire-ohci).
-  ansible.builtin.copy:
-    dest: /etc/modprobe.d/blacklist-firewire.conf
-    owner: root
-    group: root
-    mode: '0644'
-    content: |
-      # Désactivation du module firewire-ohci pour interdire le stockage FireWire.
-      blacklist firewire-core
-      install firewire-core /bin/true
-      blacklist firewire-sbp2
-      install firewire-sbp2 /bin/true
-  when: ansible_system_vendor is search("QEMU")
-
-- name: Désactiver les protocoles réseaux rarement utilisés.
-  ansible.builtin.copy:
-    dest: /etc/modprobe.d/harden-network-protocols.conf
-    owner: root
-    group: root
-    mode: '0644'
-    content: |
-      # Désactivation des protocoles réseau non nécéssaires pour durcissement.
-      blacklist dccp
-      install dccp /bin/true
-      blacklist sctp
-      install sctp /bin/true
-      blacklist rds
-      install rds /bin/true
-      blacklist tipc
-      install tipc /bin/true
-
-- name: Interdire l’utilisation de su.
-  ansible.builtin.file:
-    path: /bin/su
-    mode: '0750'
-    owner: root
-    group: root
-
-# Restreindre l'accès à su aux membres du groupe wheel uniquement
-- name: Restreindre su au groupe wheel.
-  ansible.builtin.lineinfile:
-    path: /etc/pam.d/su
-    regexp: '^#?auth\s+required\s+pam_wheel.so'
-    line: 'auth required pam_wheel.so use_uid'
-    state: present
-    backup: true
-
-# Désactiver totalement su/su- (optionnel et plus radical)
-- name: Rendre su exécutable uniquement par root.
-  ansible.builtin.file:
-    path: /bin/su
-    mode: '0700'
-    owner: root
-    group: root
-
-# Empêcher toute utilisation de su- (alias ou fichier)
-- name: Créer un alias bloquant su-.
-  ansible.builtin.lineinfile:
-    path: /etc/profile
-    line: "alias su-='echo Utilisation interdite; false'"
-    insertafter: EOF
-    state: present
-
-- name: Définir SHA_CRYPT_MIN_ROUNDS.
-  ansible.builtin.lineinfile:
-    path: /etc/login.defs
-    regexp: '^SHA_CRYPT_MIN_ROUNDS'
-    line: 'SHA_CRYPT_MIN_ROUNDS 65536'
-    state: present
-    backup: true
-
-- name: Définir SHA_CRYPT_MAX_ROUNDS.
-  ansible.builtin.lineinfile:
-    path: /etc/login.defs
-    regexp: '^SHA_CRYPT_MAX_ROUNDS'
-    line: 'SHA_CRYPT_MAX_ROUNDS 65536'
-    state: present
-    backup: true
+    - {chemin: /bin/su, mode: '700'}
 
 - name: Désactivation de l'IPV6.
   ansible.builtin.template:
@@ -323,36 +78,7 @@
     group: root
     mode: '0644'
 
-- name: Securisation des politiques de mot de passe.
-  block:
-    - name: Définir l'âge minimum du mot de passe (PASS_MIN_DAYS).
-      ansible.builtin.lineinfile:
-        path: /etc/login.defs
-        regexp: '^PASS_MIN_DAYS'
-        line: 'PASS_MIN_DAYS   1'
-        state: present
-        backrefs: true
-        insertafter: EOF
-
-    - name: Définir l'âge maximum du mot de passe (PASS_MAX_DAYS).
-      ansible.builtin.lineinfile:
-        path: /etc/login.defs
-        regexp: '^PASS_MAX_DAYS'
-        line: 'PASS_MAX_DAYS   90'
-        state: present
-        backrefs: true
-        insertafter: EOF
-
-- name: Ajout de la résolution du nom.
-  ansible.builtin.lineinfile:
-    path: /etc/hosts
-    regexp: '^{{ ansible_default_ipv4.address | regex_escape }}'
-    line: "{{ ansible_default_ipv4.address }} {{ ansible_fqdn }} {{ ansible_hostname }}"
-    state: present
-    create: true
-    insertafter: "^127\\.0\\.0\\.1.*"
-
-- name: Appliquer les paramètres sysctl de durcissement
+- name: Durcissement des paramètres réseau.
   ansible.posix.sysctl:
     name: "{{ item.key }}"
     value: "{{ item.value }}"
@@ -366,6 +92,15 @@
     - {key: "net.ipv4.conf.all.send_redirects", value: "0"}
     - {key: "net.ipv4.conf.default.accept_redirects", value: "0"}
     - {key: "net.ipv4.conf.default.log_martians", value: "1"}
+
+- name: Ajout de la résolution du nom.
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    regexp: '^{{ ansible_default_ipv4.address | regex_escape }}'
+    line: "{{ ansible_default_ipv4.address }} {{ ansible_fqdn }} {{ ansible_hostname }}"
+    state: present
+    create: true
+    insertafter: "^127\\.0\\.0\\.1.*"
 
 - name: Redémarrage du serveur.
   ansible.builtin.reboot:
