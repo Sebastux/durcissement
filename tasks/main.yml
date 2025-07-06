@@ -15,9 +15,9 @@
 # - name: "Durcissement d'une machine AlmaLinux {{ ansible_distribution_major_version }}."
 #   ansible.builtin.import_tasks:
 #     file: almalinux9.yml
-#   when: ansible_distribution == "AlmaLinux" and ansible_distribution_major_version == "9")
+#   when: ansible_distribution == "AlmaLinux" and ansible_distribution_major_version == "9"
 
 - name: "Durcissement d'une machine AlmaLinux {{ ansible_distribution_major_version }}."
   ansible.builtin.import_tasks:
     file: almalinux10.yml
-  when: ansible_distribution == "AlmaLinux" and ansible_distribution_major_version == "10")
+  when: ansible_distribution == "AlmaLinux" and ansible_distribution_major_version == "10"
