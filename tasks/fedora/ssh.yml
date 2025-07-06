@@ -1,0 +1,83 @@
+---
+- name: Vidage de fichiers.
+  ansible.builtin.copy:
+    dest: "{{ item }}"
+    content: ""
+    owner: root
+    group: root
+    mode: '0644'
+    backup: false
+  loop:
+    - /etc/issue
+    - /etc/motd
+
+- name: Suppression des fichiers ssh inutiles.
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /etc/ssh/ssh_host_ecdsa_key
+    - /etc/ssh/ssh_host_ecdsa_key.pub
+    - /etc/ssh/ssh_host_ed25519_key
+    - /etc/ssh/ssh_host_ed25519_key.pub
+    - /etc/ssh/ssh_host_rsa_key
+    - /etc/ssh/ssh_host_rsa_key.pub
+    - /etc/ssh/sshd_config.d/01-permitrootlogin.conf
+    - /etc/ssh/sshd_config.d/50-redhat.conf
+
+- name: Installation de la banniére.
+  ansible.builtin.template:
+    src: banniere.j2
+    dest: /etc/issue.net
+    backup: false
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Création d'un répertoire de surcharge.
+  ansible.builtin.file:
+    path: /etc/systemd/system/sshd.service.d
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Configuration du ssh.
+  ansible.builtin.template:
+    src: "{{ item.fichier }}"
+    dest: "{{ item.chemin }}"
+    backup: no
+    owner: root
+    group: root
+    mode: '0600'
+    validate: sshd -t -f %s
+  loop:
+    - {fichier: 'sshd_config_fedora.j2', chemin: '/etc/ssh/sshd_config'}
+    - {fichier: 'sshd_config_modif.j2', chemin: '/etc/ssh/sshd_config.d/90-sshd_config_modif.conf'}
+    - {fichier: 'ssh_chiffrement.j2', chemin: '/etc/ssh/sshd_config.d/91-crypto-policies.conf'}
+    - {fichier: 'ssh_reseau.j2', chemin: '/etc/ssh/sshd_config.d/92-ssh_reseau.conf'}
+    - {fichier: 'durcissemnt.j2', chemin: '/etc/systemd/system/sshd.service.d/durcissemnt.conf'}
+
+- name: Création d'une clé ssh pour le compte root.
+  openssh_keypair:
+    path: "{{ role_path }}/cles_ssh/root-{{ ansible_hostname }}"
+    backend: cryptography
+    comment: "Clé SSH générée par ansible."
+    mode: 0600
+    regenerate: always
+    state: present
+    type: ed25519
+  delegate_to: localhost
+
+- name: Installation de la clé sur le compte.
+  authorized_key:
+    user: root
+    state: present
+    key: "{{ lookup('file', role_path ~ '/cles_ssh/root-{{ ansible_hostname }}.pub') }}"
+    comment: "Clé SSH générée et installée par ansible."
+    exclusive: true
+    manage_dir: true
+
+- name: Chargement de la clé SSH.
+  ansible.builtin.set_fact:
+    ansible_ssh_private_key_file: "{{ role_path }}/cles_ssh/root-{{ ansible_hostname }}"
