@@ -3,33 +3,6 @@
   ansible.builtin.include_vars:
     file: defaults/fedora.yml
 
-- name: S'assurer que les fichiers et dossiers ont les bonnes permissions.
-  ansible.builtin.file:
-    path: "{{ item.chemin }}"
-    mode: "{{ item.mode }}"
-    owner: root
-    group: root
-  loop:
-    - {chemin: /etc/at.deny, mode: '0600'}
-    - {chemin: /etc/cron.deny, mode: '0600'}
-    - {chemin: /etc/crontab, mode: '0600'}
-    - {chemin: /etc/cron.d, mode: '0700'}
-    - {chemin: /etc/cron.daily, mode: '0700'}
-    - {chemin: /etc/cron.hourly, mode: '0700'}
-    - {chemin: /etc/cron.weekly, mode: '0700'}
-    - {chemin: /etc/cron.monthly, mode: '0700'}
-    - {chemin: /etc/shadow, mode: '0600'}
-    - {chemin: /etc/gshadow, mode: '0600'}
-    - {chemin: /etc/passwd, mode: '0644'}
-    - {chemin: /etc/group, mode: '0644'}
-    - {chemin: /etc/sudoers, mode: '0440'}
-    - {chemin: /etc/sudoers.d, mode: '0750'}
-    - {chemin: /etc/ssh/sshd_config, mode: '0600'}
-    - {chemin: /etc/ssh/sshd_config.d, mode: '0750'}
-    - {chemin: /root, mode: '0700'}
-    - {chemin: /usr/bin/as, mode: '700'}
-    - {chemin: /usr/bin/ccache, mode: '700'}
-    - {chemin: /bin/su, mode: '700'}
 
 - name: Redémarrage du serveur.
   ansible.builtin.reboot:
