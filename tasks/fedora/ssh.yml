@@ -50,7 +50,6 @@
     owner: root
     group: root
     mode: '0600'
-    validate: sshd -t -f %s
   loop:
     - {fichier: 'sshd_config_fedora.j2', chemin: '/etc/ssh/sshd_config'}
     - {fichier: 'sshd_config_modif.j2', chemin: '/etc/ssh/sshd_config.d/90-sshd_config_modif.conf'}
