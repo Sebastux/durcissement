@@ -3,6 +3,17 @@
   ansible.builtin.include_vars:
     file: defaults/fedora.yml
 
+- name: Gestion de QEMU.
+  ansible.builtin.import_tasks:
+    file: fedora/qemu.yml
+
+- name: Configuration de dnf5.
+  ansible.builtin.import_tasks:
+    file: fedora/dnf5.yml
+
+- name: Configuration du SSH.
+  ansible.builtin.import_tasks:
+    file: fedora/ssh.yml
 
 - name: Redémarrage du serveur.
   ansible.builtin.reboot:
