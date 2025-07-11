@@ -46,7 +46,7 @@
   ansible.builtin.template:
     src: "{{ item.fichier }}"
     dest: "{{ item.chemin }}"
-    backup: no
+    backup: false
     owner: root
     group: root
     mode: '0600'
