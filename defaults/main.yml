@@ -6,3 +6,6 @@ liste_serveur:
   - 3.fr.pool.ntp.org iburst
 
 seq: ""
+fail2ban: ['fail2ban', 'fail2ban-firewalld', 'fail2ban-hostsdeny', 'fail2ban-mail',
+           'fail2ban-selinux', 'fail2ban-sendmail', 'fail2ban-server', 'fail2ban-systemd',
+           'fail2ban-tests']
