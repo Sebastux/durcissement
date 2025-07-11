@@ -1,0 +1,16 @@
+{{ ansible_managed | comment }}
+
+
+[DEFAULT]
+# Adresse mail du destinataire des alertes
+destemail = {{ fail2ban_destemail | default('root@localhost') }}
+sendername = Fail2Ban
+
+# Pour un rôle, on veut souvent le mode "agressif" pour SSH
+bantime  = {{ fail2ban_bantime | default('3600') }}
+findtime = {{ fail2ban_findtime | default('600') }}
+maxretry = {{ fail2ban_maxretry | default('3') }}
+banaction = firewallcmd-ipset
+
+# Notification : sendmail-mail ou mail pour basique, action_ pour détaillée
+action = %(action_mwl)s
