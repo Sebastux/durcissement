@@ -3,17 +3,53 @@
   ansible.builtin.include_vars:
     file: defaults/fedora.yml
 
-- name: Gestion de QEMU.
-  ansible.builtin.import_tasks:
-    file: fedora/qemu.yml
-
 - name: Configuration de dnf5.
   ansible.builtin.import_tasks:
     file: fedora/dnf5.yml
 
+- name: Gestion de QEMU.
+  ansible.builtin.import_tasks:
+    file: fedora/qemu.yml
+
 - name: Configuration du SSH.
   ansible.builtin.import_tasks:
     file: fedora/ssh.yml
+
+- name: Durcissement des paramètres réseau.
+  ansible.builtin.import_tasks:
+    file: fedora/reseau.yml
+
+- name: Gestion des droits sur les fichiers.
+  ansible.builtin.import_tasks:
+    file: fedora/permissions.yml
+
+- name: Configuration de l'horloge.
+  ansible.builtin.import_tasks:
+    file: fedora/temps.yml
+
+- name: Désactivation des services inutiles.
+  ansible.builtin.import_tasks:
+    file: fedora/services.yml
+
+- name: Désactivation des modules inutiles.
+  ansible.builtin.import_tasks:
+    file: fedora/modprobe.yml
+
+- name: Configuration de PAM.
+  ansible.builtin.import_tasks:
+    file: fedora/pam.yml
+
+- name: Configuration de login.def.
+  ansible.builtin.import_tasks:
+    file: fedora/login_def.yml
+
+- name: Configuration de `/etc/profile`.
+  ansible.builtin.import_tasks:
+    file: fedora/profile.yml
+
+- name: Installation / configuration de fail2ban.
+  ansible.builtin.import_tasks:
+    file: fedora/fail2ban.yml
 
 - name: Redémarrage du serveur.
   ansible.builtin.reboot:
