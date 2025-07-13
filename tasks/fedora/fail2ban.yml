@@ -5,7 +5,7 @@
     state: latest
     update_cache: false
 
-- name: installation de la configuration de fail2ban.
+- name: Installation de la configuration de fail2ban.
   ansible.builtin.template:
     src: "{{ item.fichier }}"
     dest: "{{ item.chemin }}"
