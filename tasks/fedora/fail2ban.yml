@@ -15,7 +15,7 @@
     mode: '0644'
   loop:
     - {fichier: 'fail2ban.j2', chemin: '/etc/fail2ban/jail.local'}
-    - {fichier: 'fail2ban-ssh.j2', chemin: '/etc/fail2ban/jail.d/sshd.local'}
+    - {fichier: 'fail2ban-ssh.j2', chemin: '/etc/fail2ban/jail.d/01-sshd.local'}
 
 - name: Active fail2ban au démarrage.
   ansible.builtin.systemd_service:

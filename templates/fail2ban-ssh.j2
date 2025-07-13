@@ -2,17 +2,12 @@
 
 
 [sshd]
+mode     = normal
 enabled  = true
 port     = ssh
 logpath  = %(sshd_log)s
 backend  = systemd
 
-# Paramètres classiques
 maxretry = {{ fail2ban_maxretry | default('3') }}
 bantime  = {{ fail2ban_bantime | default('3600') }}
 findtime = 600
-
-{% if fail2ban_ssh_whitelist is defined and fail2ban_ssh_whitelist|length > 0 %}
-# Liste blanche d'IP (ne seront jamais bannies, une par ligne)
-ignoreip = 127.0.0.1/8 ::1 {{ ansible_default_ipv4.address }}{{ " " if fail2ban_ssh_whitelist else "" }}{% for ip in fail2ban_ssh_whitelist.split() %} {{ ip }}{% endfor %}
-{% endif %}

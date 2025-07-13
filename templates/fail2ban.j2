@@ -5,8 +5,16 @@
 # Adresse mail du destinataire des alertes
 destemail = {{ fail2ban_destemail | default('root@localhost') }}
 sendername = Fail2Ban
+loglevel = INFO
+socket = /var/run/fail2ban/fail2ban.sock
+pidfile = /var/run/fail2ban/fail2ban.pid
 
-# Pour un rôle, on veut souvent le mode "agressif" pour SSH
+# "logencoding" spécifie l'encodage des fichiers journaux gérés par la prison. Il permet de décoder les lignes du fichier journal. Exemples typiques : « ascii », « utf-8 ».
+logencoding = utf-8
+
+# « mode » définit le mode du filtre (voir l'implémentation du filtre correspondant pour plus d'informations).
+mode = normal
+
 bantime  = {{ fail2ban_bantime | default('3600') }}
 findtime = {{ fail2ban_findtime | default('600') }}
 maxretry = {{ fail2ban_maxretry | default('3') }}
@@ -14,3 +22,10 @@ banaction = firewallcmd-ipset
 
 # Notification : sendmail-mail ou mail pour basique, action_ pour détaillée
 action = %(action_mwl)s
+
+{% if fail2ban_ssh_whitelist is defined and fail2ban_ssh_whitelist|length > 0 %}
+# Liste blanche d'IP (ne seront jamais bannies, une par ligne)
+ignoreip = 127.0.0.1/8 ::1 {{ ansible_default_ipv4.address }}{{ " " if fail2ban_ssh_whitelist else "" }}{% for ip in fail2ban_ssh_whitelist.split() %} {{ ip }}{% endfor %}
+{% else %}
+ignoreip = 127.0.0.1/8 ::1
+{% endif %}
