@@ -77,6 +77,8 @@
     exclusive: true
     manage_dir: true
 
-- name: Chargement de la clé SSH.
+- name: Chargement dynamique de la clé SSH.
   ansible.builtin.set_fact:
     ansible_ssh_private_key_file: "{{ role_path }}/cles_ssh/root-{{ ansible_hostname }}"
+  delegate_to: localhost
+  run_once: false
