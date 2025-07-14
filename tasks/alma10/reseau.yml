@@ -1,0 +1,46 @@
+---
+- name: Désactivation de l'IPV6.
+  ansible.builtin.template:
+    src: disableipv6.j2
+    dest: /etc/sysctl.d/99-disable-ipv6.conf
+    backup: no
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Durcissement des paramètres réseau.
+  ansible.posix.sysctl:
+    name: "{{ item.key }}"
+    value: "{{ item.value }}"
+    state: present
+    sysctl_file: /etc/sysctl.d/99-hardening.conf
+  loop:
+    - {key: "net.core.bpf_jit_harden", value: "2"}
+    - {key: "net.ipv4.conf.all.accept_redirects", value: "0"}
+    - {key: "net.ipv4.conf.all.log_martians", value: "1"}
+    - {key: "net.ipv4.conf.all.rp_filter", value: "1"}
+    - {key: "net.ipv4.conf.all.send_redirects", value: "0"}
+    - {key: "net.ipv4.conf.default.accept_redirects", value: "0"}
+    - {key: "net.ipv4.conf.default.log_martians", value: "1"}
+
+- name: Ajout de la résolution du nom.
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    regexp: '^{{ ansible_default_ipv4.address | regex_escape }}'
+    line: "{{ ansible_default_ipv4.address }} {{ ansible_fqdn }} {{ ansible_hostname }}"
+    state: present
+    create: true
+    insertafter: "^127\\.0\\.0\\.1.*"
+
+- name: Configuration de firewall.
+  ansible.posix.firewalld:
+    service: "{{ item.service }}"
+    permanent: true
+    state: "{{ item.etat }}"
+    immediate: true
+  loop:
+    - {service: 'http', etat: 'disabled'}
+    - {service: 'https', etat: 'disabled'}
+    - {service: 'ftp', etat: 'disabled'}
+    - {service: 'ssh', etat: 'enabled'}
+    - {service: 'ntp', etat: 'enabled'}

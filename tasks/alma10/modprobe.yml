@@ -1,0 +1,43 @@
+---
+- name: Désactiver le stockage USB.
+  ansible.builtin.copy:
+    dest: /etc/modprobe.d/usb-storage.conf
+    owner: root
+    group: root
+    mode: '0644'
+    content: |
+      # Désactivation du module usb-storage pour renforcer la sécurité.
+      blacklist usb-storage
+      install usb-storage /bin/true
+  when: ansible_system_vendor is search("QEMU")
+
+- name: Désactiver le stockage FireWire (firewire-ohci).
+  ansible.builtin.copy:
+    dest: /etc/modprobe.d/blacklist-firewire.conf
+    owner: root
+    group: root
+    mode: '0644'
+    content: |
+      # Désactivation du module firewire-ohci pour interdire le stockage FireWire.
+      blacklist firewire-core
+      install firewire-core /bin/true
+      blacklist firewire-sbp2
+      install firewire-sbp2 /bin/true
+  when: ansible_system_vendor is search("QEMU")
+
+- name: Désactiver les protocoles réseaux rarement utilisés.
+  ansible.builtin.copy:
+    dest: /etc/modprobe.d/harden-network-protocols.conf
+    owner: root
+    group: root
+    mode: '0644'
+    content: |
+      # Désactivation des protocoles réseau non nécéssaires pour durcissement.
+      blacklist dccp
+      install dccp /bin/true
+      blacklist sctp
+      install sctp /bin/true
+      blacklist rds
+      install rds /bin/true
+      blacklist tipc
+      install tipc /bin/true

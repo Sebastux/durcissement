@@ -1,0 +1,57 @@
+---
+- name: Configuration de dnf5.
+  ansible.builtin.script: install_dnf.sh
+  register: var_dnf
+  changed_when: var_dnf.rc == 0
+  failed_when: var_dnf.rc != 0 and var_dnf.rc != 1
+  ignore_errors: true
+
+- name: "Almalinux - Ajout de paramètres au fichier de configuration de dnf."
+  ansible.builtin.ini_file:
+    path: /etc/dnf/dnf.conf
+    section: main
+    option: "{{ item.option }}"
+    value: "{{ item.valeur }}"
+    owner: root
+    group: root
+    mode: '0644'
+  loop:
+    - {option: 'clean_requirements_on_remove', valeur: 'True'}
+    - {option: 'fastestmirror', valeur: 'True'}
+    - {option: 'max_parallel_downloads', valeur: '4'}
+    - {option: 'metadata_timer_sync', valeur: '0'}
+    - {option: 'log_compress', valeur: 'True'}
+    - {option: 'deltarpm', valeur: 'True'}
+    - {option: 'color', valeur: 'always'}
+    - {option: 'color_list_installed_older', valeur: 'yellow'}
+    - {option: 'color_list_installed_newer', valeur: "bold,yellow"}
+    - {option: 'color_list_installed_reinstall', valeur: "dim,cyan"}
+    - {option: 'color_list_installed_running_kernel', valeur: "bold,underline"}
+    - {option: 'color_list_installed_extra', valeur: "bold,red"}
+    - {option: 'color_list_available_upgrade', valeur: "bold,blue"}
+    - {option: 'color_list_available_downgrade', valeur: "dim,magenta"}
+    - {option: 'color_list_available_install', valeur: "bold,cyan"}
+    - {option: 'color_list_available_reinstall', valeur: "bold,underline,green"}
+    - {option: 'color_list_available_running_kernel', valeur: "bold,underline"}
+    - {option: 'color_search_match', valeur: "bold,magenta"}
+    - {option: 'color_update_installed', valeur: "bg:red"}
+    - {option: 'color_update_local', valeur: "dim,green"}
+    - {option: 'color_update_remote', valeur: "bold,green"}
+
+- name: Suppression de paquets à risque.
+  ansible.builtin.dnf5:
+    name: "{{ liste_remove }}"
+    state: absent
+  ignore_errors: true
+
+- name: Mise à jour du système.
+  ansible.builtin.dnf5:
+    name: "*"
+    state: latest
+    update_cache: true
+
+- name: Installation de packages.
+  ansible.builtin.dnf5:
+    name: "{{ liste_install }}"
+    state: latest
+    update_cache: false

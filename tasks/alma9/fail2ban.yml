@@ -1,0 +1,24 @@
+---
+- name: Installation de fail2ban.
+  ansible.builtin.dnf5:
+    name: "{{ fail2ban }}"
+    state: latest
+    update_cache: false
+
+- name: Installation de la configuration de fail2ban.
+  ansible.builtin.template:
+    src: "{{ item.fichier }}"
+    dest: "{{ item.chemin }}"
+    backup: false
+    owner: root
+    group: root
+    mode: '0644'
+  loop:
+    - {fichier: 'fail2ban.j2', chemin: '/etc/fail2ban/jail.local'}
+    - {fichier: 'fail2ban-ssh.j2', chemin: '/etc/fail2ban/jail.d/01-sshd.local'}
+
+- name: Active fail2ban au démarrage.
+  ansible.builtin.systemd_service:
+    name: fail2ban
+    enabled: true
+    state: started

@@ -1,0 +1,17 @@
+---
+- name: Ajouter umask 027 dans /etc/profile si non présent.
+  ansible.builtin.lineinfile:
+    path: /etc/profile
+    regexp: '^umask'
+    line: 'umask 027'
+    insertafter: EOF
+    state: present
+    backup: true
+
+# Empêcher toute utilisation de su- (alias ou fichier)
+- name: Créer un alias bloquant su-.
+  ansible.builtin.lineinfile:
+    path: /etc/profile
+    line: "alias su-='echo Utilisation interdite; false'"
+    insertafter: EOF
+    state: present

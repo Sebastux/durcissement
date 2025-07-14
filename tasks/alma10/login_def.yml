@@ -1,0 +1,45 @@
+---
+- name: S'assurer que la valeur de umask par défaut est stricte dans /etc/login.defs.
+  ansible.builtin.lineinfile:
+    path: /etc/login.defs
+    regexp: '^UMASK'
+    line: 'UMASK 027'
+    state: present
+    backup: true
+
+- name: Définir SHA_CRYPT_MIN_ROUNDS.
+  ansible.builtin.lineinfile:
+    path: /etc/login.defs
+    regexp: '^SHA_CRYPT_MIN_ROUNDS'
+    line: 'SHA_CRYPT_MIN_ROUNDS 65536'
+    state: present
+    backup: true
+
+- name: Définir SHA_CRYPT_MAX_ROUNDS.
+  ansible.builtin.lineinfile:
+    path: /etc/login.defs
+    regexp: '^SHA_CRYPT_MAX_ROUNDS'
+    line: 'SHA_CRYPT_MAX_ROUNDS 65536'
+    state: present
+    backup: true
+
+- name: Securisation des politiques de mot de passe.
+  block:
+    - name: Définir l'âge minimum du mot de passe (PASS_MIN_DAYS).
+      ansible.builtin.lineinfile:
+        path: /etc/login.defs
+        regexp: '^PASS_MIN_DAYS'
+        line: 'PASS_MIN_DAYS   1'
+        state: present
+        backrefs: true
+        insertafter: EOF
+
+    - name: Définir l'âge maximum du mot de passe (PASS_MAX_DAYS).
+      ansible.builtin.lineinfile:
+        path: /etc/login.defs
+        regexp: '^PASS_MAX_DAYS'
+        line: 'PASS_MAX_DAYS   90'
+        state: present
+        backrefs: true
+        insertafter: EOF
+

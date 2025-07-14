@@ -1,0 +1,14 @@
+---
+- name: Désinstallation du package qemu-guest-agent (machine physique).
+  ansible.builtin.dnf5:
+    name: "qemu-guest-agent"
+    state: absent
+    update_cache: false
+  when: not ansible_system_vendor is search("QEMU")
+
+- name: activation du service qemu-guest-agent (VM).
+  ansible.builtin.systemd_service:
+    name: qemu-guest-agent
+    state: started
+    enabled: true
+  when: ansible_system_vendor is search("QEMU")

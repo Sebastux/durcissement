@@ -1,0 +1,19 @@
+---
+- name: Configuration de la timezone.
+  community.general.timezone:
+    name: Europe/Paris
+
+- name: Configuration de chrony.
+  ansible.builtin.template:
+    src: chrony.j2
+    dest: /etc/chrony.conf
+    backup: false
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Démarrage du service chrony.
+  ansible.builtin.systemd_service:
+    name: chronyd
+    state: started
+    enabled: true

@@ -1,0 +1,25 @@
+---
+- name: Activation d'auditd.
+  ansible.builtin.systemd_service:
+    name: auditd
+    state: started
+    enabled: true
+
+- name: Désactivation de services.
+  ansible.builtin.systemd_service:
+    name: "{{ item }}"
+    state: stopped
+    enabled: false
+  loop:
+    - bluetooth
+    - lvm2-monitor
+    - lvm2-lvmpolld.socket
+    - mdmonitor
+    - raid-check.timer
+    - cups
+    - postfix
+    - sssd
+    - selinux-autorelabel-mark
+    - kdump
+    - dnf-makecache.timer
+  ignore_errors: true
