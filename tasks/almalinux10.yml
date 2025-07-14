@@ -1,1 +1,6 @@
 ---
+- name: Import des variables de la distribution.
+  ansible.builtin.include_vars:
+    file: defaults/almalinux10.yml
+
+
