@@ -12,12 +12,16 @@
     file: fedora.yml
   when: ansible_distribution == "Fedora"
 
-# - name: "Durcissement d'une machine AlmaLinux {{ ansible_distribution_major_version }}."
-#   ansible.builtin.import_tasks:
-#     file: almalinux9.yml
-#   when: ansible_distribution == "AlmaLinux" and ansible_distribution_major_version == "9"
+- name: "Durcissement d'une machine AlmaLinux 9."
+  ansible.builtin.import_tasks:
+    file: almalinux9.yml
+  when:
+    - foundmatch: ansible_distribution is search("AlmaLinux")
+    - alsomatch: ansible_distribution_major_version is search("9")
 
-- name: "Durcissement d'une machine AlmaLinux {{ ansible_distribution_major_version }}."
+- name: "Durcissement d'une machine AlmaLinux 10."
   ansible.builtin.import_tasks:
     file: almalinux10.yml
-  when: ansible_distribution == "AlmaLinux" and ansible_distribution_major_version == "10"
+  when:
+    - foundmatch: ansible_distribution is search("AlmaLinux")
+    - alsomatch: ansible_distribution_major_version is search("10")
