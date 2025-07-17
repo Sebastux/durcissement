@@ -1,6 +1,6 @@
 ---
 - name: Installation de fail2ban.
-  ansible.builtin.dnf5:
+  ansible.builtin.dnf:
     name: "{{ fail2ban }}"
     state: latest
     update_cache: false
