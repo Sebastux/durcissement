@@ -24,5 +24,4 @@
     - {chemin: /etc/ssh/sshd_config.d, mode: '0750'}
     - {chemin: /root, mode: '0700'}
     - {chemin: /usr/bin/as, mode: '700'}
-    - {chemin: /usr/bin/ccache, mode: '700'}
     - {chemin: /bin/su, mode: '700'}
