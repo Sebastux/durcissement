@@ -7,21 +7,17 @@
       - "Version mmineure de la distribution : {{ ansible_distribution_version }}."
       - "Architecture                        : {{ ansible_machine }}."
 
-- name: "Durcissement d'une machine fedora {{ ansible_distribution_major_version }}."
+- name: Durcissement d'une machine Fedora.
   ansible.builtin.import_tasks:
     file: fedora.yml
-  when: ansible_distribution == "Fedora"
+  when: ansible_distribution is search("Fedora")
 
-- name: "Durcissement d'une machine AlmaLinux 9."
+- name: Durcissement d'une machine AlmaLinux 9.
   ansible.builtin.import_tasks:
     file: almalinux9.yml
-  when:
-    - foundmatch: ansible_distribution is search("AlmaLinux")
-    - alsomatch: ansible_distribution_major_version is search("9")
+  when: ansible_distribution is search("AlmaLinux") and ansible_distribution_major_version is search("9")
 
-- name: "Durcissement d'une machine AlmaLinux 10."
+- name: Durcissement d'une machine AlmaLinux 10.
   ansible.builtin.import_tasks:
     file: almalinux10.yml
-  when:
-    - foundmatch: ansible_distribution is search("AlmaLinux")
-    - alsomatch: ansible_distribution_major_version is search("10")
+  when: ansible_distribution is search("AlmaLinux") and ansible_distribution_major_version is search("10")
