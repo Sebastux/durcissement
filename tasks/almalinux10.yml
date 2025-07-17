@@ -5,7 +5,7 @@
 
 - name: Configuration de dnf.
   ansible.builtin.import_tasks:
-    file: fedora/dnf.yml
+    file: alma10/dnf.yml
 
 - name: Gestion de QEMU.
   ansible.builtin.import_tasks:
