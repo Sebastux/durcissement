@@ -1,1 +1,57 @@
 ---
+- name: Import des variables de la distribution.
+  ansible.builtin.include_vars:
+    file: defaults/almalinux9.yml
+
+- name: Gestion de QEMU.
+  ansible.builtin.import_tasks:
+    file: alma9/qemu.yml
+
+- name: Configuration du SSH.
+  ansible.builtin.import_tasks:
+    file: alma9/ssh.yml
+
+- name: Durcissement des paramètres réseau.
+  ansible.builtin.import_tasks:
+    file: alma9/reseau.yml
+
+- name: Gestion des droits sur les fichiers.
+  ansible.builtin.import_tasks:
+    file: alma9/permissions.yml
+
+- name: Configuration de l'horloge.
+  ansible.builtin.import_tasks:
+    file: alma9/temps.yml
+
+- name: Désactivation des services inutiles.
+  ansible.builtin.import_tasks:
+    file: alma9/services.yml
+
+- name: Désactivation des modules inutiles.
+  ansible.builtin.import_tasks:
+    file: alma9/modprobe.yml
+
+- name: Configuration de PAM.
+  ansible.builtin.import_tasks:
+    file: alma9/pam.yml
+
+- name: Configuration de login.def.
+  ansible.builtin.import_tasks:
+    file: alma9/login_def.yml
+
+- name: Configuration de `/etc/profile`.
+  ansible.builtin.import_tasks:
+    file: alma9/profile.yml
+
+- name: Installation / configuration de fail2ban.
+  ansible.builtin.import_tasks:
+    file: alma9/fail2ban.yml
+
+- name: Redémarrage du serveur.
+  ansible.builtin.reboot:
+    msg: "Redémarrage automatique du serveur par ansible."
+    connect_timeout: 5
+    reboot_timeout: 300
+    pre_reboot_delay: 0
+    post_reboot_delay: 30
+    test_command: uptime
