@@ -1,11 +1,4 @@
 ---
-- name: Configuration de dnf5.
-  ansible.builtin.script: install_dnf.sh
-  register: var_dnf
-  changed_when: var_dnf.rc == 0
-  failed_when: var_dnf.rc != 0 and var_dnf.rc != 1
-  ignore_errors: true
-
 - name: "Almalinux - Ajout de paramètres au fichier de configuration de dnf."
   ansible.builtin.ini_file:
     path: /etc/dnf/dnf.conf
@@ -39,19 +32,19 @@
     - {option: 'color_update_remote', valeur: "bold,green"}
 
 - name: Suppression de paquets à risque.
-  ansible.builtin.dnf5:
+  ansible.builtin.dnf:
     name: "{{ liste_remove }}"
     state: absent
   ignore_errors: true
 
 - name: Mise à jour du système.
-  ansible.builtin.dnf5:
+  ansible.builtin.dnf:
     name: "*"
     state: latest
     update_cache: true
 
 - name: Installation de packages.
-  ansible.builtin.dnf5:
+  ansible.builtin.dnf:
     name: "{{ liste_install }}"
     state: latest
     update_cache: false
