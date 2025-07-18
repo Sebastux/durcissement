@@ -3,6 +3,10 @@
   ansible.builtin.include_vars:
     file: defaults/almalinux9.yml
 
+- name: Configuration de dnf.
+  ansible.builtin.import_tasks:
+    file: alma9/dnf.yml
+
 - name: Gestion de QEMU.
   ansible.builtin.import_tasks:
     file: alma9/qemu.yml
