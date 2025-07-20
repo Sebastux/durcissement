@@ -1,6 +1,6 @@
 ---
 - name: "Almalinux - Ajout de paramètres au fichier de configuration de dnf."
-  ansible.builtin.ini_file:
+  community.general.ini_file:
     path: /etc/dnf/dnf.conf
     section: main
     option: "{{ item.option }}"
