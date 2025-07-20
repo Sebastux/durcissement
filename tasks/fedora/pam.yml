@@ -12,7 +12,6 @@
     module_arguments: 'sha512 shadow nullok rounds=65536'
     state: after
 
-# Restreindre l'accès à su aux membres du groupe wheel uniquement
 - name: Restreindre su au groupe wheel.
   ansible.builtin.lineinfile:
     path: /etc/pam.d/su
@@ -20,4 +19,3 @@
     line: 'auth required pam_wheel.so use_uid'
     state: present
     backup: true
-

@@ -58,18 +58,18 @@
     - {fichier: 'durcissemnt.j2', chemin: '/etc/systemd/system/sshd.service.d/durcissemnt.conf'}
 
 - name: Création d'une clé ssh pour le compte root.
-  openssh_keypair:
+  community.crypto.openssh_keypair:
     path: "{{ role_path }}/cles_ssh/root-{{ ansible_hostname }}"
     backend: cryptography
     comment: "Clé SSH générée par ansible."
-    mode: 0600
+    mode: '0600'
     regenerate: always
     state: present
     type: ed25519
   delegate_to: localhost
 
 - name: Installation de la clé sur le compte.
-  authorized_key:
+  ansible.posix.authorized_key:
     user: root
     state: present
     key: "{{ lookup('file', role_path ~ '/cles_ssh/root-{{ ansible_hostname }}.pub') }}"

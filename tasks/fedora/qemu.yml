@@ -6,7 +6,7 @@
     update_cache: false
   when: not ansible_system_vendor is search("QEMU")
 
-- name: activation du service qemu-guest-agent (VM).
+- name: Activation du service qemu-guest-agent (VM).
   ansible.builtin.systemd_service:
     name: qemu-guest-agent
     state: started

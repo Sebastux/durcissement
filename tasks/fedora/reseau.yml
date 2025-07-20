@@ -3,7 +3,7 @@
   ansible.builtin.template:
     src: disableipv6.j2
     dest: /etc/sysctl.d/99-disable-ipv6.conf
-    backup: no
+    backup: false
     owner: root
     group: root
     mode: '0644'
@@ -31,6 +31,9 @@
     state: present
     create: true
     insertafter: "^127\\.0\\.0\\.1.*"
+    owner: root
+    group: root
+    mode: '0644'
 
 - name: Configuration de firewall.
   ansible.posix.firewalld:
