@@ -1,23 +1,12 @@
-exclude_paths:
-  - .cache/
-  - .github/
-  - .yamllint
-  - .ansible-lint
-  - 'cles_ssh'
-  - '*/meta/*'
-  - '*/tests/*'
+profile: production# min, basic, moderate, safety, shared, production
+
+# Offline mode disables installation of requirements.yml
+offline: true
+
+# Return success if number of violations compared with previous git
+# commit has not increased. This feature works only in git
+# repositories.
+progressive: false
 
 skip_list:
-  - 'fqcn-builtins'
-  - 'package-latest'
-
-warn_list:
-  - 'document-end'
-  - 'brackets'
-  - 'ignore-errors'
-  - 'command-instead-of-shell'
-  - 'command-instead-of-module'
-
-verbosity: 1
-
-use_default_rules: true
+  - yaml[empty-lines]
