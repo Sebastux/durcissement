@@ -1,3 +1,4 @@
 ---
 liste_install: ['audit', 'chrony']
 liste_remove: ['telnet', 'rsh', 'rlogin', 'ftp', 'vlc*']
+active2fa_fed: {{ active2fa_fedora | bool | default('false') }}

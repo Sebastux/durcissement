@@ -1,3 +1,4 @@
 ---
 liste_install: ['audit', 'chrony']
 liste_remove: ['telnet', 'rsh', 'rlogin', 'ftp']
+active2fa_alm9: {{ active2fa_alma9 | bool | default('false') }}
