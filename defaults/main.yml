@@ -10,4 +10,6 @@ fail2ban: ['fail2ban', 'fail2ban-firewalld', 'fail2ban-hostsdeny', 'fail2ban-mai
            'fail2ban-selinux', 'fail2ban-sendmail', 'fail2ban-server', 'fail2ban-systemd',
            'fail2ban-tests']
 
+install_epel: ['epel-release']
+
 # ansible_ssh_private_key_file: "{{ role_path }}/cles_ssh/root-{{ ansible_hostname }}"

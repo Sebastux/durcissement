@@ -1,5 +1,5 @@
 ---
-- name: "Almalinux - Ajout de paramètres au fichier de configuration de dnf."
+- name: Ajout de paramètres au fichier de configuration de dnf.
   community.general.ini_file:
     path: /etc/dnf/dnf.conf
     section: main
@@ -36,6 +36,12 @@
     name: "{{ liste_remove }}"
     state: absent
   ignore_errors: true
+
+- name: Installation des dépôts epel.
+  ansible.builtin.dnf:
+    name: "{{ install_epel }}"
+    state: present
+    disable_gpg_check: true
 
 - name: Mise à jour du système.
   ansible.builtin.dnf:
