@@ -6,7 +6,7 @@
   failed_when: var_dnf.rc != 0 and var_dnf.rc != 1
   ignore_errors: true
 
-- name: "Almalinux - Ajout de paramètres au fichier de configuration de dnf."
+- name: Ajout de paramètres au fichier de configuration de dnf.
   community.general.ini_file:
     path: /etc/dnf/dnf.conf
     section: main
