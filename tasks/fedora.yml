@@ -15,10 +15,6 @@
   ansible.builtin.import_tasks:
     file: fedora/ssh.yml
 
-# - name: Configuration du SSH 2Fa.
-#   ansible.builtin.import_tasks:
-#     file: fedora/ssh2fa.yml
-
 - name: Durcissement des paramètres réseau.
   ansible.builtin.import_tasks:
     file: fedora/reseau.yml
