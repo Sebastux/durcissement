@@ -1,8 +1,8 @@
 # Rôle Ansible : durcissement
 
-Ce rôle Ansible automatise le durcissement de systèmes Linux, en appliquant un ensemble de bonnes pratiques de<br />
-sécurité adaptées aux distributions Fedora et AlmaLinux (versions 9 et 10). Il offre des configurations robustes pour<br />
-protéger les machines contre des usages non souhaités ou des vulnérabilités courantes, tout en adaptant précisément les<br />
+Ce rôle Ansible automatise le durcissement de systèmes Linux, en appliquant un ensemble de bonnes pratiques de
+sécurité adaptées aux distributions Fedora et AlmaLinux (versions 9 et 10). Il offre des configurations robustes pour
+protéger les machines contre des usages non souhaités ou des vulnérabilités courantes, tout en adaptant précisément les
 tâches aux systèmes cibles.
 
 ## Prérequis
