@@ -1,0 +1,9 @@
+---
+- name: Durcissement de la configuration sudo.
+  ansible.builtin.template:
+    src: config_sudo.j2
+    dest: /etc/sudoers.d/99-durcissement
+    backup: false
+    owner: root
+    group: root
+    mode: '0640'

@@ -51,6 +51,10 @@
   ansible.builtin.import_tasks:
     file: alma10/fail2ban.yml
 
+- name: Configuration de sudo.
+  ansible.builtin.import_tasks:
+    file: alma10/sudo.yml
+
 - name: Redémarrage du serveur.
   ansible.builtin.reboot:
     msg: "Redémarrage automatique du serveur par ansible."
