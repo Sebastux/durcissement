@@ -52,6 +52,25 @@ la conformité des tâches appliquées ne pourraient alors plus être garantis.<
 Lancement typique :
 bash ansible-playbook -i inventaire.yml playbook.yml
 
+## Notes
+
+Pour chacune des trois distributions supportées,
+le rôle supprime systématiquement les clés SSH par défaut de la machine cible.
+Une nouvelle paire de clés SSH est ensuite générée lors du redémarrage de la machine.
+La configuration du serveur SSH est adaptée afin d’interdire l’authentification
+par mot de passe : seule une connexion via clé SSH sera autorisée.
+
+Le rôle crée automatiquement une nouvelle paire de clés SSH, stockée dans le sous-répertoire `cles_ssh` du répertoire du rôle. Le nom des fichiers de clés contient le FQDN (nom de domaine complet) de la machine cible pour en faciliter l’identification. La clé publique générée est installée sur le compte `root` de la machine.
+
+**Attention** : après le redémarrage de la machine cible, la clé SSH de cette dernière aura changé. Pour éviter tout problème d’avertissement ou de refus de connexion, il est nécessaire de supprimer l’ancienne clé correspondante sur la machine qui exécute le rôle.  
+Procédure : pour retirer la clé obsolète du fichier `known_hosts` :
+
+```bash
+ssh-keygen -R <fqdn-de-la-machine-cible>
+```
+
+où `<fqdn-de-la-machine-cible>` doit être remplacé par le nom utilisé dans les fichiers de clés du répertoire `cles_ssh`.
+
 ## Licence
 
 [Consultez le fichier LICENSE.md](LICENSE.md)
