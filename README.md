@@ -79,9 +79,7 @@ ssh-keygen -R <fqdn-de-la-machine-cible>
 Où '[fqdn-de-la-machine-cible]' doit être remplacé par le nom utilisé dans les fichiers de clés du répertoire `cles_ssh`.
 
 ## Licence
-
-[Consultez le fichier LICENSE.md](LICENSE.md)
+Consultez le fichier [LICENSE.md](LICENSE.md)
 
 ## Auteur
-
 Sébastux
