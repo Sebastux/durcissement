@@ -76,7 +76,7 @@ Procédure : pour retirer la clé obsolète du fichier `known_hosts` :
 ssh-keygen -R <fqdn-de-la-machine-cible>
 ```
 <br />
-Où `<fqdn-de-la-machine-cible>` doit être remplacé par le nom utilisé dans les fichiers de clés du répertoire `cles_ssh`.
+Où '<fqdn-de-la-machine-cible>' doit être remplacé par le nom utilisé dans les fichiers de clés du répertoire `cles_ssh`.
 
 ## Licence
 
